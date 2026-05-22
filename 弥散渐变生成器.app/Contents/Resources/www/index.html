@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>弥散渐变生成器</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="workspace" aria-label="渐变预览">
+        <div class="artboard-wrap" id="artboardWrap">
+          <canvas id="artboard" width="2400" height="1600"></canvas>
+          <div class="gradient-handles" id="gradientHandles" aria-label="拖动颜色位置"></div>
+        </div>
+        <div class="preview-meta">
+          <p id="canvasMeta">2400 x 1600</p>
+        </div>
+      </section>
+
+      <aside class="panel" aria-label="生成控制">
+        <header class="brand">
+          <div>
+            <p class="eyebrow">Local Generator</p>
+            <h1>弥散渐变</h1>
+          </div>
+          <button class="icon-button" id="randomize" type="button" aria-label="随机生成" title="随机生成">
+            <span aria-hidden="true">↻</span>
+          </button>
+        </header>
+
+        <div class="toolbar" role="group" aria-label="导出操作">
+          <button id="download" type="button">
+            <span aria-hidden="true">↓</span>
+            PNG
+          </button>
+          <button id="copyCss" type="button">
+            <span aria-hidden="true">⌘</span>
+            CSS
+          </button>
+        </div>
+
+        <section class="control-group" aria-labelledby="preset-title">
+          <div class="group-title">
+            <h2 id="preset-title">色卡</h2>
+            <span id="seedLabel"></span>
+          </div>
+          <button id="randomPalette" class="wide-button" type="button">随机色卡</button>
+          <div class="preset-grid" id="presets"></div>
+        </section>
+
+        <section class="control-group" aria-labelledby="canvas-title">
+          <h2 id="canvas-title">画布</h2>
+          <label class="field">
+            <span>比例</span>
+            <select id="ratio">
+              <option value="2400x1600">3:2</option>
+              <option value="2400x1800">4:3</option>
+              <option value="2400x1350">16:9</option>
+              <option value="1800x2400">3:4</option>
+              <option value="1600x2400">2:3</option>
+              <option value="2000x2000">1:1</option>
+              <option value="1290x2796">iPhone</option>
+            </select>
+          </label>
+        </section>
+
+        <section class="control-group" aria-labelledby="texture-title">
+          <h2 id="texture-title">质感</h2>
+          <label class="slider">
+            <span>流动</span>
+            <input id="motion" type="range" min="0" max="100" value="38" />
+            <output id="motionValue">38</output>
+          </label>
+          <label class="slider">
+            <span>柔化</span>
+            <input id="blur" type="range" min="20" max="180" value="92" />
+            <output id="blurValue">92</output>
+          </label>
+          <label class="slider">
+            <span>颗粒</span>
+            <input id="grain" type="range" min="0" max="45" value="14" />
+            <output id="grainValue">14</output>
+          </label>
+        </section>
+
+        <section class="control-group" aria-labelledby="color-title">
+          <div class="group-title">
+            <h2 id="color-title">弥散</h2>
+            <span id="countLabel"></span>
+          </div>
+          <div class="mini-toolbar" role="group" aria-label="弥散数量">
+            <button id="removeBlob" class="icon-button" type="button" aria-label="减少弥散" title="减少弥散">
+              <span aria-hidden="true">−</span>
+            </button>
+            <button id="addBlob" class="icon-button" type="button" aria-label="增加弥散" title="增加弥散">
+              <span aria-hidden="true">+</span>
+            </button>
+          </div>
+          <div class="swatches" id="swatches" aria-label="当前色板"></div>
+        </section>
+      </aside>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>
