@@ -29,4 +29,5 @@ clang "$ROOT_DIR/native/GradientApp.m" \
   -framework WebKit
 
 chmod +x "$MACOS/GradientApp"
+codesign --force --deep --sign - "$APP_DIR"
 echo "$APP_DIR"
