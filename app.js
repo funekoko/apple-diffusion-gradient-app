@@ -80,6 +80,7 @@ const state = {
   blur: 92,
   grain: 14,
 };
+let dragFrame = 0;
 
 const controls = {
   artboardWrap: document.querySelector("#artboardWrap"),
@@ -267,7 +268,7 @@ function buildBlobs(random, palette) {
   }));
 }
 
-function drawGradient() {
+function drawGradient({ draft = false } = {}) {
   const palette = state.colors;
   const random = mulberry32(state.seed);
   const { width, height } = canvas;
@@ -283,7 +284,8 @@ function drawGradient() {
 
   ctx.save();
   ctx.globalCompositeOperation = "source-over";
-  ctx.filter = `blur(${state.blur}px) saturate(1.25)`;
+  const blur = draft ? Math.max(18, Math.round(state.blur * 0.55)) : state.blur;
+  ctx.filter = `blur(${blur}px) saturate(1.25)`;
 
   for (const blob of buildBlobs(random, palette)) {
     const x = blob.x * width;
@@ -308,7 +310,9 @@ function drawGradient() {
   ctx.fillStyle = polish;
   ctx.fillRect(0, 0, width, height);
 
-  drawGrain(width, height);
+  if (!draft) {
+    drawGrain(width, height);
+  }
   controls.seedLabel.textContent = `#${state.seed}`;
 }
 
@@ -514,6 +518,22 @@ function buildCssSnippet() {
   linear-gradient(135deg, ${palette[0]}, ${endColor});`;
 }
 
+function scheduleDraftRender() {
+  if (dragFrame) return;
+  dragFrame = requestAnimationFrame(() => {
+    dragFrame = 0;
+    drawGradient({ draft: true });
+  });
+}
+
+function flushFullRender() {
+  if (dragFrame) {
+    cancelAnimationFrame(dragFrame);
+    dragFrame = 0;
+  }
+  drawGradient();
+}
+
 function setPointFromPointer(event, index) {
   const rect = canvas.getBoundingClientRect();
   state.points[index] = {
@@ -521,7 +541,7 @@ function setPointFromPointer(event, index) {
     y: clampUnit((event.clientY - rect.top) / rect.height),
   };
   positionHandles();
-  drawGradient();
+  scheduleDraftRender();
 }
 
 function bindControls() {
@@ -568,13 +588,18 @@ function bindControls() {
 
     const move = (moveEvent) => setPointFromPointer(moveEvent, index);
     const up = () => {
-      handle.releasePointerCapture(event.pointerId);
+      if (handle.hasPointerCapture(event.pointerId)) {
+        handle.releasePointerCapture(event.pointerId);
+      }
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+      flushFullRender();
     };
 
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
   });
 
   controls.copyCss.addEventListener("click", async () => {
